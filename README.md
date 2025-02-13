@@ -15,7 +15,6 @@ This is a simple MERN (MongoDB, Express, React, Node.js) application set up with
 Ensure you have Docker and Docker Compose installed on your machine.
 
 - [Install Docker](https://docs.docker.com/get-docker/)
-- [Install Docker Compose](https://docs.docker.com/compose/install/)
 
 ### 1. Create a Docker Network
 
