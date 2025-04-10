@@ -1,0 +1,61 @@
+version: '3.9'
+
+services:
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo-data:/data/db
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  server:
+    build: ./backend
+    container_name: express-server
+    ports:
+      - '5000:5000'
+    depends_on:
+      - mongo
+      - rabbitmq
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/mernApp
+      - RABBIT_URL=amqp://rabbitmq
+    volumes:
+      - ./backend:/app
+
+  consumer:
+    build: ./consumer
+    container_name: consumer-service
+    depends_on:
+      - mongo
+      - rabbitmq
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/mernApp
+      - RABBIT_URL=amqp://rabbitmq
+    volumes:
+      - ./consumer:/app
+
+  client:
+    build: ./frontend
+    container_name: react-client
+    ports:
+      - '5173:5173'
+    stdin_open: true
+    tty: true
+    depends_on:
+      - server
+    volumes:
+      - ./frontend:/app
+
+volumes:
+  mongo-data:

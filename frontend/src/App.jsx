@@ -7,26 +7,30 @@ function App() {
   const [description, setDescription] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost:5000/items').then((res) => setItems(res.data));
+    axios.get('http://localhost:5000/items') 
+      .then((res) => setItems(res.data))
+      .catch(err => console.error("Fetch error:", err));
   }, []);
 
   const addItem = () => {
-    axios.post('http://localhost:5000/items', { name, description }).then((res) => {
-      setItems([...items, res.data]);
-      setName('');
-      setDescription('');
-    });
+    axios.post('http://localhost:5000/items', { name, description })
+      .then(() => {
+        setItems([...items, { name, description }]);
+        setName('');
+        setDescription('');
+      })
+      .catch(err => console.error("Add error:", err));
   };
 
   return (
-    <div>
-      <h1>MERN App</h1>
+    <div style={{ padding: 20 }}>
+      <h1>MERN App (via Docker)</h1>
       <input placeholder='Name' value={name} onChange={(e) => setName(e.target.value)} />
       <input placeholder='Description' value={description} onChange={(e) => setDescription(e.target.value)} />
       <button onClick={addItem}>Add Item</button>
       <ul>
-        {items.map((item) => (
-          <li key={item._id}>{item.name}: {item.description}</li>
+        {items.map((item, index) => (
+          <li key={index}>{item.name}: {item.description}</li>
         ))}
       </ul>
     </div>
