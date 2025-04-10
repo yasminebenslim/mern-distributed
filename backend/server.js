@@ -1,23 +1,21 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const sendToQueue = require('./producer');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+const mongoURL = process.env.MONGO_URL || 'mongodb://localhost:27017/mernApp';
 
-// Connect to MongoDB
-mongoose.connect('mongodb://172.20.0.2:27017/mernApp', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect(mongoURL);
 
+// Model
 const ItemSchema = new mongoose.Schema({
   name: String,
   description: String,
 });
 const Item = mongoose.model('Item', ItemSchema);
-
 // GET routes
 app.get('/items', async (req, res) => {
   const items = await Item.find();
@@ -31,9 +29,10 @@ app.get('/items/:id', async (req, res) => {
 
 // POST routes
 app.post('/items', async (req, res) => {
-  const newItem = new Item(req.body);
-  await newItem.save();
-  res.json(newItem);
+  // await sendToQueue(req.body);
+  await sendToQueue.sendToDirectExchange(req.body,"item.create")
+  console.log("sent to consumer")
+  res.json({ message: 'Item sent to queue!' });
 });
 
 app.post('/items/update/:id', async (req, res) => {
